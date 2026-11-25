@@ -18,9 +18,8 @@ pipeline {
       steps {
         checkout scm; script {
           env.TAG = sh(script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim(); 
-          env.FRONTEND_IMAGE
-            = "${ECR_REGISTRY}/${FRONTEND_REPOSITORY}:${TAG}"; env.BACKEND_IMAGE
-            = "${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${TAG}"
+          env.FRONTEND_IMAGE = "${ECR_REGISTRY}/${FRONTEND_REPOSITORY}:${TAG}"; 
+          env.BACKEND_IMAGE  = "${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${TAG}"
           }
         }
       }
