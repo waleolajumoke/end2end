@@ -34,7 +34,75 @@ spec:
         - name: postgres
           image: postgres:16-alpine
           ports: [{ containerPort: 5432 }]
-          envFrom: [{ secretRef: { name: postgres-secret } }]
+          envFrom: [{ secretRef: { name: postgres-secret } }]apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: fullstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+
+  template:
+    metadata:
+      labels:
+        app: postgres
+
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile:
+          type: RuntimeDefault
+
+      containers:
+        - name: postgres
+          image: postgres:16-alpine
+
+          ports:
+            - containerPort: 5432
+
+          envFrom:
+            - secretRef:
+                name: postgres-secret
+
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - appuser
+                - -d
+                - fullstackdb
+            initialDelaySeconds: 10
+            periodSeconds: 10
+
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: postgres-data
           volumeMounts: [{ name: data, mountPath: /var/lib/postgresql/data }]
           readinessProbe: { exec: { command: ["pg_isready", "-U", "appuser", "-d", "fullstackdb"] }, initialDelaySeconds: 10, periodSeconds: 10 }
           resources:
