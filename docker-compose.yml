@@ -1,0 +1,37 @@
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: fullstackdb
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: local-password-only
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d fullstackdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend-service:
+    build: ./backend
+    environment:
+      NODE_ENV: development
+      PORT: 5000
+      DATABASE_URL: postgresql://appuser:local-password-only@database:5432/fullstackdb
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./frontend
+    depends_on:
+      - backend-service
+    ports:
+      - "3000:80"
+
+volumes:
+  postgres_data:

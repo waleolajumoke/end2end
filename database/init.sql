@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS products (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(120) NOT NULL,
+  price NUMERIC(12, 2) NOT NULL CHECK (price >= 0),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+INSERT INTO products (name, price)
+SELECT 'DevSecOps Training', 250000
+WHERE NOT EXISTS (SELECT 1 FROM products);

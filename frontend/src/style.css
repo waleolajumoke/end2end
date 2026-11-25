@@ -1,0 +1,10 @@
+:root { font-family: Inter, system-ui, sans-serif; color: #24132d; background: #faf7fb; }
+body { margin: 0; } main { max-width: 900px; margin: auto; padding: 5rem 2rem; }
+header { background: linear-gradient(135deg, #662477, #e4007e); color: white; padding: 3rem; border-radius: 24px; }
+.eyebrow { letter-spacing: .16em; font-weight: 800; } h1 { font-size: clamp(2rem, 5vw, 4rem); margin: .4rem 0; }
+section { background: white; margin-top: 2rem; padding: 2rem; border-radius: 20px; box-shadow: 0 12px 40px #35144114; }
+article { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #eee; }
+.product-form { display: flex; gap: .75rem; flex-wrap: wrap; }
+input { padding: .8rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; }
+button { border: 0; border-radius: 8px; padding: .75rem 1rem; background: #702581; color: white; cursor: pointer; margin-left: .4rem; }
+button.secondary { background: #777; }.danger { background: #b42318; }.error { color: #b42318; font-weight: 700; }

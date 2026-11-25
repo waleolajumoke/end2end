@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env*
+!.env.example
+terraform/.terraform/
+terraform/*.tfstate*
+terraform/terraform.tfvars
+k8s/secret.yaml
