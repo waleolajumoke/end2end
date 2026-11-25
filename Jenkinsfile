@@ -83,8 +83,7 @@ pipeline {
             kubectl apply -f k8s/namespace.yaml; 
             kubectl apply -f k8s/configmap.yaml; 
             kubectl apply -f k8s/postgres.yaml; 
-            kubectl create secret generic backend-secrets -n "$KUBE_NAMESPACE" --from-literal=DATABASE_URL="$DATABASE_URL" 
-            --from-literal=JWT_SECRET="$JWT_SECRET" --dry-run=client -o yaml | kubectl apply -f -; 
+            kubectl create secret generic backend-secrets -n "$KUBE_NAMESPACE" --from-literal="DATABASE_URL=$DATABASE_URL" --from-literal="JWT_SECRET=$JWT_SECRET" --dry-run=client -o yaml | kubectl apply -f -; 
             sed "s|BACKEND_IMAGE|$BACKEND_IMAGE|g" k8s/backend-deployment.yaml | 
             kubectl apply -f -; 
             sed "s|FRONTEND_IMAGE|$FRONTEND_IMAGE|g" k8s/frontend-deployment.yaml | 
