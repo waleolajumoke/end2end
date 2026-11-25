@@ -4,6 +4,8 @@ pipeline {
     timestamps(); disableConcurrentBuilds(); timeout(time: 45, unit: 'MINUTES')
   }
   environment {
+    DATABASE_URL = credentials('database-url')
+    JWT_SECRET = credentials('jwt-secret')
     AWS_REGION = 'us-east-1'
     EKS_CLUSTER = 'tech365-fullstack-devsecops'
     ECR_REGISTRY = '418272776333.dkr.ecr.us-east-1.amazonaws.com'
@@ -15,7 +17,8 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm; script {
-          env.TAG = sh(script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim(); env.FRONTEND_IMAGE
+          env.TAG = sh(script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim(); 
+          env.FRONTEND_IMAGE
             = "${ECR_REGISTRY}/${FRONTEND_REPOSITORY}:${TAG}"; env.BACKEND_IMAGE
             = "${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${TAG}"
           }
@@ -31,20 +34,20 @@ pipeline {
           sh 'trivy fs --scanners vuln,secret,misconfig --severity HIGH,CRITICAL --exit-code 1 .'
         }
       }
-      // stage('SonarQube Cloud') {
-      //   steps {
-      //     withSonarQubeEnv('sonar-cloud') {
-      //       sh 'sonar-scanner'
-      //     }
-      //   }
-      // }
-      // stage('Quality gate') {
-      //   steps {
-      //     timeout(time: 10, unit: 'MINUTES') {
-      //       waitForQualityGate abortPipeline: true
-      //     }
-      //   }
-      // }
+      stage('SonarQube Cloud') {
+        steps {
+          withSonarQubeEnv('sonar-cloud') {
+            sh 'sonar-scanner'
+          }
+        }
+      }
+      stage('Quality gate') {
+        steps {
+          timeout(time: 10, unit: 'MINUTES') {
+            waitForQualityGate abortPipeline: true
+          }
+        }
+      }
       stage('Build images') {
         steps {
           sh 'docker build --pull -t "$FRONTEND_IMAGE" frontend && docker build --pull -t "$BACKEND_IMAGE" backend'
