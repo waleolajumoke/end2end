@@ -8,6 +8,7 @@ stringData:
   POSTGRES_DB: fullstackdb
   POSTGRES_USER: appuser
   POSTGRES_PASSWORD: replace-me-for-classroom
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -15,26 +16,14 @@ metadata:
   name: postgres-data
   namespace: fullstack
 spec:
-  accessModes: [ReadWriteOnce]
+  accessModes:
+    - ReadWriteOnce
   resources:
-    requests: { storage: 10Gi }
+    requests:
+      storage: 10Gi
+
 ---
 apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: postgres
-  namespace: fullstack
-spec:
-  replicas: 1
-  selector: { matchLabels: { app: postgres } }
-  template:
-    metadata: { labels: { app: postgres } }
-    spec:
-      containers:
-        - name: postgres
-          image: postgres:16-alpine
-          ports: [{ containerPort: 5432 }]
-          envFrom: [{ secretRef: { name: postgres-secret } }]apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: postgres
@@ -44,12 +33,10 @@ spec:
   selector:
     matchLabels:
       app: postgres
-
   template:
     metadata:
       labels:
         app: postgres
-
     spec:
       securityContext:
         runAsNonRoot: true
@@ -64,7 +51,8 @@ spec:
           image: postgres:16-alpine
 
           ports:
-            - containerPort: 5432
+            - name: postgres
+              containerPort: 5432
 
           envFrom:
             - secretRef:
@@ -103,12 +91,7 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: postgres-data
-          volumeMounts: [{ name: data, mountPath: /var/lib/postgresql/data }]
-          readinessProbe: { exec: { command: ["pg_isready", "-U", "appuser", "-d", "fullstackdb"] }, initialDelaySeconds: 10, periodSeconds: 10 }
-          resources:
-            requests: { cpu: 100m, memory: 256Mi }
-            limits: { cpu: 500m, memory: 512Mi }
-      volumes: [{ name: data, persistentVolumeClaim: { claimName: postgres-data } }]
+
 ---
 apiVersion: v1
 kind: Service
@@ -116,5 +99,9 @@ metadata:
   name: postgres
   namespace: fullstack
 spec:
-  selector: { app: postgres }
-  ports: [{ port: 5432, targetPort: 5432 }]
+  selector:
+    app: postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
