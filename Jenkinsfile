@@ -15,14 +15,27 @@ pipeline {
   }
   stages {
     stage('Checkout') {
-      steps {
-        checkout scm; script {
-          env.TAG = sh(script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim(); 
-          env.FRONTEND_IMAGE = "${ECR_REGISTRY}/${FRONTEND_REPOSITORY}:${TAG}"; 
-          env.BACKEND_IMAGE  = "${ECR_REGISTRY}/${BACKEND_REPOSITORY}:${TAG}"
-          }
+    steps {
+        checkout scm
+
+        script {
+            def commitId = sh(
+                script: 'git rev-parse --short=7 HEAD',
+                returnStdout: true
+            ).trim()
+
+            env.TAG = "${commitId}-${env.BUILD_NUMBER}"
+
+            env.FRONTEND_IMAGE =
+                "${env.ECR_REGISTRY}/${env.FRONTEND_REPOSITORY}:${env.TAG}"
+
+            env.BACKEND_IMAGE =
+                "${env.ECR_REGISTRY}/${env.BACKEND_REPOSITORY}:${env.TAG}"
+
+            echo "Image tag: ${env.TAG}"
         }
-      }
+    }
+}
       // stage('Tests') {
       //   steps {
       //     sh 'cd backend && npm install && npm test'; sh 'cd frontend && npm install && npm run build'
